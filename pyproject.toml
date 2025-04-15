@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "networkanalysis"
+version = "0.1.0"
+description = "ML-based network anomaly detection system, implemented with a pre-trained hybrid model (Isolation Forest & Random Forest)."
+authors = ["Chau T. Chan (Kyna)"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+numpy = "^2.2.4"
+joblib = "^1.4.2"
+pandas = "^2.2.3"
+scikit-learn = "^1.6.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
