@@ -5,9 +5,9 @@ from sklearn.ensemble import RandomForestClassifier
 
 class AnomalyClassifier: 
 
-    def __init__(self, model = None, identified_anomalies=None):
-        self.rf_model = model | None
-        self.identified_anomalies = identified_anomalies | None
+    def __init__(self, model, identified_anomalies):
+        self.rf_model = model
+        self.identified_anomalies = identified_anomalies
 
         self.rf_predictions = None
 

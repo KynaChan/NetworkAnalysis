@@ -15,13 +15,13 @@ class PcapProcessor:
     def __init__(self, pcap_file_path: str):
         self.pcap_file_path = pcap_file_path
 
-        self.df = pd.DataFrame | None = None
+        self.df: pd.DataFrame | None = None
         self.features: pd.DataFrame | None = None
         self.labels: pd.DataFrame | None = None
 
     # Return the processed DataFrame.
-    def preprocess(self):
-
+    def preprocess(self, type: str = "train") -> pd.DataFrame:
+        
         # transform the data
         # select features
         # remove duplicates
@@ -29,7 +29,8 @@ class PcapProcessor:
         # handle missing values
 
         # do i drop and split here??
-
+        
+        
         return # wht to return??
 
 # Coversion and feature selection steps
@@ -50,6 +51,8 @@ class PcapProcessor:
         if self.df.empty:
             raise ValueError(f"\n  [ERROR] The DataFrame is empty after transformation.\n")
         
+        
+        
     # Additional feature selection
     def select_features(self, selected_features = SELECTED_FEATURES):
 
@@ -58,6 +61,14 @@ class PcapProcessor:
         
         print(f"\n  [SUCCESS] Features selected: {self.features.columns}\n")
 
+
+    def process_training_data(self, pcap_file_path: str) -> pd.DataFrame:
+        output_df = N
+        
+        return None
+    
+    def process_testing_data(self, pcap_file_path: str) -> pd.DataFrame:
+        return None
 
 
 # Data cleaning steps

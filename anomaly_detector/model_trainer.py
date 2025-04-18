@@ -4,6 +4,9 @@ import pandas as pd
 from sklearn.metrics import accuracy_score, classification_report
 from sklearn.ensemble import IsolationForest, RandomForestClassifier
 
+
+from pcap_processor import PcapProcessor
+
 class ModelTrainer:
     def __init__(self, preprocessed_data: pd.DataFrame, labels):
         self.if_model = None
@@ -12,10 +15,10 @@ class ModelTrainer:
         self.if_prediction = None
         self.rf_prediction = None
 
-        self.df = preprocessed_data | None
-        self.labels = labels | None
+        self.df = preprocessed_data
+        self.labels = labels
 
-
+ 
     
     def train_if_model(self, n_estimators=None, contamination=None):
 

@@ -9,13 +9,13 @@ from sklearn.ensemble import IsolationForest
 
 class AnomalyDetector:
 
-    def __init__(self, model = None, processed_data=pd.DataFrame()):
-        self.if_model = model | None
+    def __init__(self, model, processed_data):
+        self.if_model = model
         self.processed_data = processed_data
 
-        self.if_predictions = pd.DataFrame | None
-        self.anomalies = pd.DataFrame | None
-        self.benign = pd.DataFrame | None
+        self.if_predictions = None
+        self.anomalies = None
+        self.benign = None
 
 
     def identify_anomalies(self):
@@ -33,7 +33,6 @@ class AnomalyDetector:
         print(f"\n  [SUCCESS] Benign instances identified: {len(self.benign)}\n")
         return self.anomalies # do i return the benign instances too?
 
-# do i need to save it as a file?
     def save_anomalies(self, output_file="anomalies.csv"):
         if self.anomalies is None:
             raise ValueError("\n  [ERROR] No anomalies to save.\n")
