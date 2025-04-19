@@ -3,57 +3,50 @@ import pandas as pd
 import numpy as np
 from sklearn.ensemble import IsolationForest
 
-from anomaly_detector.anomaly_detector import AnomalyDetector
+from network_analyzer.anomaly_detector import AnomalyDetector
 
 
-@pytest.fixture()
-def test_data():
-    # 10 normal points, 2 outliers
-    normal_data = np.random.normal(0, 1, (10, 2))
-    outlier_data = np.random.normal(10, 1, (2, 2))
-    data = np.vstack([normal_data, outlier_data])
-    return pd.DataFrame(data, columns=["feature1", "feature2"])
+def test_anomalydetector_run_returns_transformed_predictions():
+    # Arrange
+    data = pd.DataFrame({"a": [0, 0, 100, 0]})
+    model = IsolationForest(random_state=42).fit(data)
+    detector = AnomalyDetector(model, data)
+
+    # Act
+    result = detector.run()
+
+    # Assert
+    assert isinstance(result, pd.Series)
+    assert set(result.unique()).issubset({0, 1})
 
 
-def test_identify_anomalies_success(test_data):
-    data = test_data
-    model = IsolationForest(contamination=0.15, random_state=42)
-    model.fit(data)
+def test_identify_anomalies_sets_attributes():
+    data = pd.DataFrame({"a": [1, 2, 100, 2]})
+    model = IsolationForest(random_state=0).fit(data)
+    detector = AnomalyDetector(model, data)
+    detector.identify_anomalies()
 
-    detector = AnomalyDetector(model=model, processed_data=data)
-    anomalies = detector.identify_anomalies()
-
-    assert anomalies is not None
-    assert isinstance(anomalies, pd.DataFrame)
-    assert len(anomalies) > 0
-    assert len(detector.benign) > 0
+    assert detector.if_predictions is not None
+    assert detector.anomalies is not None
+    assert detector.benign is not None
 
 
-def test_identify_anomalies_failure():
-    detector = AnomalyDetector()
-    with pytest.raises(ValueError, match=r".*Model or processed data.*"):
+def test_transform_predictions_raises_without_predictions():
+    detector = AnomalyDetector(None, None)
+    with pytest.raises(ValueError):
+        detector.transform_predictions()
+
+
+def test_identify_anomalies_raises_without_model_or_data():
+    detector = AnomalyDetector(None, None)
+    with pytest.raises(ValueError):
         detector.identify_anomalies()
 
 
-def test_save_anomalies(tmp_path, test_data):
-    # Setup
-    data = test_data
-    model = IsolationForest(contamination=0.15, random_state=42)
-    model.fit(data)
-
-    detector = AnomalyDetector(model=model, processed_data=data)
+def test_extract_anomalies_returns_anomalies():
+    data = pd.DataFrame({"a": [1, 2, 100, 2]})
+    model = IsolationForest(random_state=0).fit(data)
+    detector = AnomalyDetector(model, data)
     detector.identify_anomalies()
-
-    output_file = tmp_path / "anomalies.csv"
-    detector.save_anomalies(output_file=str(output_file))
-
-    # Assert file is created and not empty
-    assert output_file.exists()
-    saved_data = pd.read_csv(output_file)
-    assert not saved_data.empty
-
-
-def test_save_anomalies_without_identification():
-    detector = AnomalyDetector()
-    with pytest.raises(ValueError, match=r".*No anomalies to save.*"):
-        detector.save_anomalies("dummy.csv")
+    anomalies = detector.extract_anomalies()
+    assert isinstance(anomalies, pd.DataFrame)

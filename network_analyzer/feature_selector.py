@@ -20,7 +20,7 @@ class FeatureSelector:
         self.feature_names = prep_data.columns
 # need for both model, but prep_data for rf_model is split randomly, do i take another arg for rf_prep_data?
         
-        self.selected_features = None | list[str]
+        self.selected_features = None
 
     
 

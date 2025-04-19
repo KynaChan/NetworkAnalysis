@@ -4,6 +4,12 @@ import numpy as np
 
 from sklearn.model_selection import train_test_split
 
+class RfDataParams:
+    XTrain = None
+    XTest = None
+    YTrain = None
+    YTest = None
+
 
 class DataProcessor:
 
@@ -14,17 +20,29 @@ class DataProcessor:
         if self.df.empty:
             raise ValueError("\n  [ERROR] DataFrame is empty. Please check the input file.\n")
 
-        self.features: pd.DataFrame | None = None
+        # Strip whitespace from column names
+        self.df = self.df.columns.str.strip()
+
+
+        # self.features: pd.DataFrame | None = None
         self.labels: pd.DataFrame | None = None
 
 
 
 # Main function to process data
-    def process_supervised_data(self) -> pd.DataFrame:
+    def process_rf_data(self) -> RfDataParams:
 
         self.process_data()
         x_train, x_test, y_train, y_test = self.split_data()
-        return x_train, x_test, y_train, y_test
+        
+        
+        rf_data = RfDataParams()
+        rf_data.XTrain = x_train
+        rf_data.XTest = x_test
+        rf_data.YTrain = y_train
+        rf_data.YTest = y_test
+        
+        return rf_data
 
     def process_data(self):
         self.select_features()
@@ -72,11 +90,12 @@ class DataProcessor:
 
     # Drop 'Label' column
     def drop_label(self):
-        # save labels
-        self.labels = self.features[' Label']
 
-        if ' Label' in self.features.columns:
-            self.features.drop(columns=[' Label'], inplace=True)
+        # save labels
+        self.labels = self.features['Label']
+
+        if 'Label' in self.features.columns:
+            self.features.drop(columns=['Label'], inplace=True)
             print(f"\n  [SUCCESS] 'Label' column dropped.\n")
         else:
             print(f"\n  [INFO] No 'Label' column found to drop.\n")
@@ -94,14 +113,3 @@ class DataProcessor:
         return x_train, x_test, y_train, y_test
 
 
-
-
-    
-
-
-    
-
-    
-    
-    
-    

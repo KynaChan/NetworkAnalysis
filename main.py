@@ -1,5 +1,8 @@
 
-from anomaly_detector.network_sniffer import NetworkSniffer
+
+
+from network_analyzer.network_sniffer import NetworkSniffer
+
 
 def main():
     print("Starting Network Sniffer...")
