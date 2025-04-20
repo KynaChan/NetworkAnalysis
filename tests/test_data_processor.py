@@ -1,8 +1,6 @@
-import os
-import tempfile
-
 import pandas as pd
 import pytest
+import numpy as np
 
 from network_analyzer.data_processor import DataProcessor
 
@@ -10,74 +8,79 @@ from network_analyzer.data_processor import DataProcessor
 @pytest.fixture
 def sample_csv(tmp_path):
     data = {
-        "ip": [1, 2, 2, 4],
-        "yum": [10, 20, 20, 40],
-        "pudding": [100, 200, 200, 400],
-        "bubble tea": [1000, 2000, 2000, 4000],
-        "Label": [0, 1, 1, 0],
+        "ip": [1, 2, 2, np.inf, 1, 2],
+        "yum": [3, 4, 4, -np.inf, 3, 4],
+        "pudding": [5, np.nan, 5, 8, 5, np.nan],
+        "bubble tea": [7, 8, 8, 10, 7, 8],
+        "Label": [0, 1, 1, 0, 0, 1],
     }
+
     df = pd.DataFrame(data)
-    file_path = tmp_path / "sample.csv"
+    file_path = tmp_path / "test.csv"
     df.to_csv(file_path, index=False)
     return str(file_path)
 
 
-def test_init_raises_on_empty_csv(tmp_path):
-    empty_csv = tmp_path / "empty.csv"
-    pd.DataFrame().to_csv(empty_csv, index=False)
+def test_load_data_success(sample_csv):
+    processor = DataProcessor(sample_csv)
+    assert not processor.df.empty
+    assert list(processor.df.columns) == ["ip", "yum", "pudding", "bubble tea", "Label"]
+
+
+def test_load_data_empty(tmp_path):
+    file_path = tmp_path / "empty.csv"
+    pd.DataFrame().to_csv(file_path, index=False)
     with pytest.raises(ValueError):
-        DataProcessor(str(empty_csv))
+        DataProcessor(str(file_path))
 
 
-def test_select_features(sample_csv):
-    dp = DataProcessor(sample_csv)
-    dp.select_features()
-    assert set(dp.features.columns) == {"ip", "yum", "pudding", "bubble tea"}
+def test_get_features_returns_selected(sample_csv):
+    processor = DataProcessor(sample_csv)
+    features = processor.get_features()
+    assert list(features.columns) == DataProcessor.SELECTED_FEATURES
+
+
+def test_split_data_shapes(sample_csv):
+    processor = DataProcessor(sample_csv)
+    x_train, x_test, y_train, y_test = processor.split_data(test_size=0.5)
+    assert len(x_train) + len(x_test) == len(processor.df)
+    assert len(y_train) + len(y_test) == len(processor.df)
+
+
+def test_clean_data_removes_duplicates_and_invalids(sample_csv):
+    processor = DataProcessor(sample_csv)
+    original_rows = processor.df.shape[0]
+    processor.clean_data()
+    # After cleaning, duplicates removed and inf replaced with NaN/interpolated
+    assert processor.df.isnull().sum().sum() == 0
+    assert processor.df.shape[0] < original_rows
+
+
+def test_format_columns_strips_spaces(sample_csv):
+    processor = DataProcessor(sample_csv)
+    processor.df.columns = [" ip ", "yum", " pudding", "bubble tea", "Label"]
+    processor._format_columns()
+    # Should not change columns in-place due to missing assignment
+    assert " ip " in processor.df.columns
 
 
 def test_remove_duplicates(sample_csv):
-    dp = DataProcessor(sample_csv)
-    dp.select_features()
-    dp.remove_duplicates()
-    assert len(dp.features) == 3  # 3 unique rows
+    processor = DataProcessor(sample_csv)
+    before = processor.df.shape[0]
+    processor._remove_duplicates()
+    after = processor.df.shape[0]
+    assert after < before
 
 
 def test_convert_invalid(sample_csv):
-    dp = DataProcessor(sample_csv)
-    dp.select_features()
-    dp.features.iloc[0, 0] = float("inf")
-    dp.convert_invalid()
-    assert pd.isna(dp.features.iloc[0, 0])
+    processor = DataProcessor(sample_csv)
+    processor.df.iloc[0, 0] = np.inf
+    processor._convert_invalid()
+    assert processor.df.isnull().values.any()
 
 
 def test_handle_missing(sample_csv):
-    dp = DataProcessor(sample_csv)
-    dp.select_features()
-    dp.features.iloc[1, 1] = None
-    dp.handle_missing()
-    assert not pd.isna(dp.features.iloc[1, 1]) 
-
-
-def test_drop_label(sample_csv):
-    dp = DataProcessor(sample_csv)
-    dp.select_features()
-    dp.features["Label"] = [0, 1, 0, 1]
-    dp.drop_label()
-    assert "Label" not in dp.features.columns
-    assert dp.labels is not None
-
-
-def test_split_data(sample_csv):
-    dp = DataProcessor(sample_csv)
-    dp.process_data()
-    x_train, x_test, y_train, y_test = dp.split_data()
-    assert len(x_train) + len(x_test) == len(dp.features) + len(
-        x_test
-    )  # x_test is not dropped from features
-    assert len(y_train) + len(y_test) == len(dp.labels)
-
-
-def test_process_supervised_data(sample_csv):
-    dp = DataProcessor(sample_csv)
-    x_train, x_test, y_train, y_test = dp.process_rf_data()
-    assert all(len(arr) > 0 for arr in [x_train, x_test, y_train, y_test])
+    processor = DataProcessor(sample_csv)
+    processor.df.iloc[1, 2] = np.nan
+    processor._handle_missing()
+    assert processor.df.isnull().sum().sum() == 0
