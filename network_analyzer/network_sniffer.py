@@ -1,7 +1,7 @@
 
 import os
 import subprocess
-
+import logging
 
 import pandas as pd
 
@@ -21,7 +21,7 @@ class NetworkSniffer:
     def run(self) -> pd.DataFrame:
         try:
             self.capture_traffic()
-            self.transform_data()
+            self.transform_traffic_data()
 
             return self.output_df
 
@@ -46,12 +46,12 @@ class NetworkSniffer:
         
 
     # Transform raw pcap to csv using CICFlowMeter
-    def transform_data(self, output_file="transformed_data.csv"): 
+    def transform_traffic_data(self, output_file="transformed_data.csv"): 
         cmd = ["cicflowmeter", "-f", self.pcap_file_path, "-c", output_file] 
         subprocess.run(cmd) 
         # Check if the output file was created successfully
         if not os.path.exists(output_file):
-            raise FileNotFoundError(f"\n  [ERROR] Output file {output_file} was not created.\n")
+            raise FileNotFoundError(f"[ERROR] Output file {output_file} was not created.")
         
         # Read the transformed data into a DataFrame
         self.df = pd.read_csv(output_file)
@@ -59,5 +59,5 @@ class NetworkSniffer:
 
         # Check if the DataFrame is empty
         if self.df.empty:
-            raise ValueError(f"\n  [ERROR] The DataFrame is empty after transformation.\n")
+            raise ValueError("[ERROR] The DataFrame is empty after transformation.")
 

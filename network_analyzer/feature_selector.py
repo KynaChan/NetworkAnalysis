@@ -36,7 +36,7 @@ class FeatureSelector:
 
         return rf_model.feature_importances_
 
-        
+
     def rank_features(self, feature_importances):
 
         # Sort features by importance

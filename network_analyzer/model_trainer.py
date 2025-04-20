@@ -22,7 +22,7 @@ class IfModelTrainer:
 
 class RfModelTrainer:
 
-    def __init__(self, rf_prep_data:RfDataParams):
+    def __init__(self, rf_prep_data: RfDataParams):
         self.rf_prep_data = rf_prep_data
 
     def train_model(self, n_estimators=None):

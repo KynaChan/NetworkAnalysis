@@ -21,8 +21,3 @@ class AnomalyClassifier:
         
         return self.rf_predictions
     
-    def derive_imp_scores(self):
-        if self.rf_model is None:
-            raise ValueError("\n  [ERROR] Model not provided.\n")
-        
-        return self.rf_model.feature_importances_
