@@ -1,12 +1,9 @@
-
-
 import pandas as pd
-
+from sklearn.ensemble import IsolationForest
 
 
 class AnomalyDetector:
-
-    def __init__(self, model, prep_data):
+    def __init__(self, model: IsolationForest, prep_data: pd.DataFrame):
         self.if_model = model
         self.prep_data = prep_data
 
@@ -15,43 +12,23 @@ class AnomalyDetector:
         self.benign = None
 
 
-# Main function to identify anomalies
-    def run(self):
-        try:
-            self.identify_anomalies()
-            return self.transform_predictions()
-            
-        except Exception as e:
-            raise Exception(f"\n  [ERROR] An error occurred: {e}\n")
-
-
-
-
     def identify_anomalies(self):
         if self.if_model is None or self.prep_data is None:
-            raise ValueError("\n  [ERROR] Model or processed data not provided.\n")
+            raise ValueError("[ERROR] Model or processed data not provided.\n")
 
         # Predict anomalies using the Isolation Forest model
         self.if_predictions = self.if_model.predict(self.prep_data)
 
-        ##?
-        self.anomalies = self.prep_data[self.if_predictions == -1] # do i need this?
+        self.anomalies = self.prep_data[self.if_predictions == -1]  # do i need this?
         self.benign = self.prep_data[self.if_predictions == 1]
 
-        print(f"\n  [SUCCESS] Anomalies identified: {len(self.anomalies)}\n")
-        print(f"\n  [SUCCESS] Benign instances identified: {len(self.benign)}\n")
+        print(f"[SUCCESS] Anomalies identified: {len(self.anomalies)}\n")
+        print(f"[SUCCESS] Benign instances identified: {len(self.benign)}\n")
+
 
     def transform_predictions(self):
         if self.if_predictions is None:
             raise ValueError("\n  [ERROR] No predictions to transform.\n")
-        
+
         if_predictions = pd.Series(self.if_predictions).map({1: 0, -1: 1})
         return if_predictions
-    
-
-# do i need this?
-    def extract_anomalies(self):
-        if self.anomalies is None:
-            raise ValueError("\n  [ERROR] No anomalies to save.\n")
-
-        return self.anomalies

@@ -1,7 +1,6 @@
 
 import os
 import subprocess
-import logging
 
 import pandas as pd
 
@@ -15,6 +14,8 @@ class NetworkSniffer:
     def __init__(self, interface='eth0', count=100):
         self.interface = interface
         self.count = count
+
+        self.pcap_file_path = "sniffed_traffic.pcap"
 
         self.output_df: pd.DataFrame | None = None
 
@@ -31,17 +32,16 @@ class NetworkSniffer:
     # Capture network traffic using tcpdump.
     def capture_traffic(self):
         print("Capturing network traffic...")
-        output_file = "sniffed_traffic.pcap"
         
         
-        cmd = ["tcpdump", "-i", self.interface, "-c", str(self.count), "-w", output_file]
+        cmd = ["tcpdump", "-i", self.interface, "-c", str(self.count), "-w", self.pcap_file_path]
         subprocess.run(cmd)
 
         # Check if the output file was created successfully
-        if not os.path.exists(output_file):
-            raise FileNotFoundError(f"\n  [ERROR] Output file {output_file} was not created.\n")
+        if not os.path.exists(self.pcap_file_path):
+            raise FileNotFoundError(f"\n  [ERROR] Output file {self.pcap_file_path} was not created.\n")
         
-        print(f"\n  [SUCCESS] Traffic captured and saved to {output_file}. (Packet count: {self.count})\n")
+        print(f"\n  [SUCCESS] Traffic captured and saved to {self.pcap_file_path}. (Packet count: {self.count})\n")
         
         
 

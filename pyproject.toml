@@ -13,6 +13,7 @@ pandas = "^2.2.3"
 scikit-learn = "^1.6.1"
 pytest = "^8.3.5"
 rich = "^14.0.0"
+psutil = "^7.0.0"
 
 
 [build-system]

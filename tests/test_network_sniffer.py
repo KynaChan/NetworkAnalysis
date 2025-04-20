@@ -5,61 +5,64 @@ import pytest
 
 from network_analyzer.network_sniffer import NetworkSniffer
 
+@pytest.fixture
+def network_sniffer():
+    return NetworkSniffer(interface='test0', count=10)
 
-def test_init_sets_attributes():
-    sniffer = NetworkSniffer(interface="lo", count=10)
-    assert sniffer.interface == "lo"
-    assert sniffer.count == 10
+def test_init():
+    sniffer = NetworkSniffer('test0', 50)
+    assert sniffer.interface == 'test0'
+    assert sniffer.count == 50
     assert sniffer.output_df is None
 
+@pytest.mark.integration
+def test_capture_traffic(network_sniffer):
+    with patch('subprocess.run') as mock_run:
+        network_sniffer.capture_traffic()
+        mock_run.assert_called_once_with([
+            'tcpdump', '-i', 'test0', 
+            '-c', '10', '-w', 'sniffed_traffic.pcap'
+        ])
 
-@patch("network_analyzer.network_sniffer.NetworkSniffer.capture_traffic")
-@patch("network_analyzer.network_sniffer.NetworkSniffer.transform_traffic_data")
-def test_run_calls_capture_and_transform(mock_transform, mock_capture):
-    sniffer = NetworkSniffer()
-    sniffer.output_df = pd.DataFrame({"a": [1]})
-    result = sniffer.run()
-    mock_capture.assert_called_once()
-    mock_transform.assert_called_once()
-    assert result.equals(pd.DataFrame({"a": [1]}))
+def test_capture_traffic_file_not_found(network_sniffer):
+    with patch('subprocess.run'), \
+         patch('os.path.exists', return_value=False):
+        with pytest.raises(FileNotFoundError):
+            network_sniffer.capture_traffic()
 
+def test_transform_traffic_data(network_sniffer):
+    test_df = pd.DataFrame({'col1': [1,2], 'col2': [3,4]})
+    
+    with patch('subprocess.run'), \
+         patch('os.path.exists', return_value=True), \
+         patch('pandas.read_csv', return_value=test_df):
+        network_sniffer.transform_traffic_data()
+        assert network_sniffer.df.equals(test_df)
 
-@patch("subprocess.run")
-@patch("os.path.exists", return_value=True)
-def test_capture_traffic_creates_file(mock_exists, mock_run):
-    sniffer = NetworkSniffer()
-    sniffer.capture_traffic()
-    mock_run.assert_called_once()
-    mock_exists.assert_called_with("sniffed_traffic.pcap")
+def test_transform_traffic_empty_df(network_sniffer):
+    with patch('subprocess.run'), \
+         patch('os.path.exists', return_value=True), \
+         patch('pandas.read_csv', return_value=pd.DataFrame()):
+        with pytest.raises(ValueError):
+            network_sniffer.transform_traffic_data()
 
+def test_transform_traffic_file_not_found(network_sniffer):
+    with patch('subprocess.run'), \
+         patch('os.path.exists', return_value=False):
+        with pytest.raises(FileNotFoundError):
+            network_sniffer.transform_traffic_data()
 
-@patch("subprocess.run")
-@patch("os.path.exists", return_value=False)
-def test_capture_traffic_raises_if_file_not_created(mock_exists, mock_run):
-    sniffer = NetworkSniffer()
-    with pytest.raises(FileNotFoundError):
-        sniffer.capture_traffic()
+def test_run_success(network_sniffer):
+    test_df = pd.DataFrame({'col1': [1,2], 'col2': [3,4]})
+    with patch.object(network_sniffer, 'capture_traffic'), \
+         patch.object(network_sniffer, 'transform_traffic_data'):
+        network_sniffer.output_df = test_df
+        result = network_sniffer.run()
+        assert result.equals(test_df)
 
-
-@patch("subprocess.run")
-@patch("os.path.exists", return_value=True)
-@patch("pandas.read_csv")
-def test_transform_traffic_data_success(mock_read_csv, mock_exists, mock_run):
-    sniffer = NetworkSniffer()
-    sniffer.pcap_file_path = "sniffed_traffic.pcap"
-    mock_read_csv.return_value = pd.DataFrame({"col": [1]})
-    sniffer.transform_traffic_data("output.csv")
-    mock_run.assert_called_once()
-    mock_exists.assert_called_with("output.csv")
-    assert isinstance(sniffer.df, pd.DataFrame)
-
-
-@patch("subprocess.run")
-@patch("os.path.exists", return_value=True)
-@patch("pandas.read_csv")
-def test_transform_traffic_data_empty_df_raises(mock_read_csv, mock_exists, mock_run):
-    sniffer = NetworkSniffer()
-    sniffer.pcap_file_path = "sniffed_traffic.pcap"
-    mock_read_csv.return_value = pd.DataFrame()
-    with pytest.raises(ValueError):
-        sniffer.transform_traffic_data("output.csv")
+def test_run_exception(network_sniffer):
+    with patch.object(network_sniffer, 'capture_traffic', 
+                     side_effect=Exception('Test error')):
+        with pytest.raises(Exception) as exc:
+            network_sniffer.run()
+        assert 'Test error' in str(exc.value)
