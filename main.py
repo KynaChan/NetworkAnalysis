@@ -1,8 +1,10 @@
 
 
 
-from network_analyzer.network_sniffer import NetworkSniffer
-from network_analyzer.port_mapper import PortMapper
+from network_analyser.network_sniffer import NetworkSniffer
+from network_analyser.port_mapper import PortMapper
+
+
 
 def main():
     print("Starting Network Sniffer...")

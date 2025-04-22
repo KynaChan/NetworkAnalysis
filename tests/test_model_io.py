@@ -1,5 +1,5 @@
 from unittest import mock
-from network_analyzer.model_io import ModelIO
+from network_analyser.model_io import ModelIO
 import joblib
 
 

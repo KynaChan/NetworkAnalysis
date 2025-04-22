@@ -1,5 +1,5 @@
 import pytest
-from network_analyzer.anomaly_detector import AnomalyDetector
+from network_analyser.anomaly_detector import AnomalyDetector
 import pandas as pd
 from sklearn.ensemble import IsolationForest
 

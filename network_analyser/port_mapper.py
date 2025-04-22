@@ -3,7 +3,10 @@ import psutil
 
 class PortMapper:
     """A class that maps network ports to their corresponding processes."""
-
+    # pass a df with prediction & ports
+    # then use the port column to get process
+    # process info will be add to the df as a new column
+    # return df 
     def __init__(self, ports: list[int]):
         """
         Initialize PortMapper with a list of ports to analyze.
@@ -14,7 +17,7 @@ class PortMapper:
         self.ports = ports
         self.port_info: list[dict] = []
 
-
+# rename
     def get_port_info(self) -> list[dict]:
         """
         Get information about processes running on the specified ports.

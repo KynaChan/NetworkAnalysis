@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 import pandas as pd
 import pytest
 
-from network_analyzer.network_sniffer import NetworkSniffer
+from network_analyser.network_sniffer import NetworkSniffer
 
 @pytest.fixture
 def network_sniffer():

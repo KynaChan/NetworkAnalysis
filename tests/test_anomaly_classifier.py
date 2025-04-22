@@ -2,7 +2,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from network_analyzer.anomaly_classifier import AnomalyClassifier
+from network_analyser.anomaly_classifier import AnomalyClassifier
 
 
 def test_init_sets_attributes():

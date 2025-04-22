@@ -7,17 +7,17 @@ from sklearn.model_selection import train_test_split
 class DataProcessor:
     SELECTED_FEATURES = ["ip", "yum", "pudding", "bubble tea"]
 
-    def __init__(self, data_file_path: str):
-        self.df = self.load_data(data_file_path)
+    def __init__(self, data_file_path:str=None, dataframe: pd.DataFrame = None):
+        self.df = dataframe or self.load_data_path(data_file_path)
+        assert self.df is not None, "[ERROR] DataFrame is None. Please check the input file."
 
 
-    def load_data(self, data_file_path: str) -> pd.DataFrame:
+    def load_data_path(self, data_file_path: str) -> pd.DataFrame:
         """Load data from a CSV file."""
         df = pd.read_csv(data_file_path)
 
         if df.empty:
             raise ValueError("[ERROR] DataFrame is empty. Please check the input file.")
-
         return df
 
 
@@ -26,6 +26,9 @@ class DataProcessor:
             [col for col in selected_features if col in self.df.columns]
         ]
 
+# for train purpose
+    def get_without_label(self):
+        return self.df.drop(columns=["Label"])
 
     def split_data(self, test_size=0.3):
         x = self.get_features()
@@ -46,6 +49,8 @@ class DataProcessor:
         self._remove_duplicates()
         self._convert_invalid()
         self._handle_missing()
+        
+        return self.df
 
 
 

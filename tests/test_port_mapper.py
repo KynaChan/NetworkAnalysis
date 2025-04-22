@@ -2,7 +2,8 @@ from unittest.mock import Mock, patch
 
 import psutil
 
-from network_analyzer.port_mapper import PortMapper
+from network_analyser.port_mapper import PortMapper
+import socket, os
 
 
 def test_port_mapper_initialization():
@@ -35,14 +36,25 @@ def test_get_port_info_handles_process_exceptions():
             result = mapper.get_port_info()
             assert result == []
 
-
 def test_get_port_info_returns_correct_data():
-    mock_conn = Mock(laddr=Mock(port=80), pid=123)
-    mock_process = Mock()
-    mock_process.name.return_value = "test_process"
-
-    with patch("psutil.net_connections", return_value=[mock_conn]):
-        with patch("psutil.Process", return_value=mock_process):
-            mapper = PortMapper([80])
-            result = mapper.get_port_info()
-            assert result == [{"port": 80, "pid": 123, "name": "test_process"}]
+    # Start a simple HTTP server in a separate process
+    
+    # Create a socket that will listen on port 8080
+    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server_socket.bind(('localhost', 8080))
+    server_socket.listen(1)
+    
+    try:
+        # Create PortMapper instance
+        mapper = PortMapper([8080])
+        result = mapper.get_port_info()
+        
+        # Verify that we found our socket
+        assert len(result) == 1
+        assert result[0]['port'] == 8080
+        assert result[0]['pid'] == os.getpid()
+        assert result[0]['name'] == psutil.Process().name()
+    
+    finally:
+        # Clean up
+        server_socket.close()

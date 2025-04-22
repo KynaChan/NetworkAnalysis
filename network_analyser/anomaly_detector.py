@@ -6,8 +6,8 @@ class AnomalyDetector:
     def __init__(self, model: IsolationForest, prep_data: pd.DataFrame):
         self.if_model = model
         self.prep_data = prep_data
-
         self.if_predictions = None
+
         self.anomalies = None
         self.benign = None
 

@@ -2,7 +2,7 @@ import pandas as pd
 import pytest
 import numpy as np
 
-from network_analyzer.data_processor import DataProcessor
+from network_analyser.data_processor import DataProcessor
 
 
 @pytest.fixture

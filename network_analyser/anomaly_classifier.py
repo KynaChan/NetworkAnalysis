@@ -21,3 +21,14 @@ class AnomalyClassifier:
         
         return self.rf_predictions
     
+    def get_anomaly_ports(self):
+        if self.rf_predictions is None:
+            raise ValueError("[ERROR] No predictions made yet.")
+        
+        # Get the indices of the anomalies
+        anomaly_indices = [i for i, x in enumerate(self.rf_predictions) if x == -1]
+        
+        # Get the corresponding ports
+        anomaly_ports = [self.identified_anomalies[i] for i in anomaly_indices]
+        
+        return anomaly_ports
