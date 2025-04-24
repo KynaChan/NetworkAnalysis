@@ -17,8 +17,8 @@ class FeatureSelector:
         self.detected_anomalies = detected_anomalies
         self.rf_imp_scores = rf_imp_scores
 
+        # need for both model, but prep_data for rf_model is split randomly, do i take another arg for rf_prep_data?
         self.feature_names = prep_data.columns
-# need for both model, but prep_data for rf_model is split randomly, do i take another arg for rf_prep_data?
         
         self.selected_features = None
 
@@ -38,14 +38,11 @@ class FeatureSelector:
 
 
     def rank_features(self, feature_importances):
+        feature_imp_df = pd.DataFrame({
+            'Feature': self.feature_names,
+            'Importance': feature_importances
+        })
 
-        # Sort features by importance
-        sorted_indices = feature_importances.argsort()[::-1]
-        
-        # Select top N features (e.g., top 10)
-        self.selected_features = sorted_indices[:10]
-
-
-        # # Sort features by importance scores
-        # sorted_features = sorted(self.importance_scores.items(), key=lambda x: x[1], reverse=True)
-        # self.selected_features = [feature for feature, score in sorted_features[:top_n]]
+        # Sort in descending order of importance
+        self.selected_features = feature_imp_df.sort_values(by='Importance', ascending=False).reset_index(drop=True)
+        return self.selected_features.head(TOP_N).columns.tolist()
