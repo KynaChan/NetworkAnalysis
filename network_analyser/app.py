@@ -10,18 +10,16 @@ import anomaly_detector
 import port_mapper
 
 import pandas as pd
-import numpy as np
 
 
 class NetworkAnalyser:
   
-  # analyse network with pre-trained model
-  # analyse network with loaded model
+    # analyse network with pre-trained model
+    # analyse network with loaded model
 
-  # train model with offline data
-  # 
+    # train model with offline data 
 
-  # possible features: train model with live data (with labels?)
+    # possible features: train model with live data (with labels?)
   
   
 
@@ -29,70 +27,71 @@ class NetworkAnalyser:
         pass
 
 
+    def analyse_network_with_default_models(self, interface, packet_count):
+        """
+        Capture network traffic and analyze it using default models.
 
-    def analyse_network_with_default_models(self, interface, count):
-
-        model = model_io.load_model(self.config['model_path'])
-        
-        # Start the network sniffer
-        self.network = network_sniffer.start_sniffer(self.config['interface'])
-        
-        # Process the captured packets
-        processed_data = data_processor.process_packets(self.network)
-        
-        # Extract features from the processed data
-        features = feature_selector.extract_features(processed_data)
-        
-        # Classify anomalies using the pre-trained model
-        anomalies = anomaly_classifier.classify_anomalies(model, features)
-        
-        return anomalies
+        Parameters:
+            interface (str): Network interface to capture traffic from
+            packet_count (int): Number of packets to capture
+        """
+        return self.analyse_network_with_specified_models(interface, packet_count, "model/def_if_model", "model/def_rf_model")
 
 
+    def analyse_network_with_specified_models(self, interface, packet_count, if_model_path,rf_model_path):
+        """
+        Capture network traffic and analyze it using specified models.
 
-    def analyse_network_with_specific_models(self, interface, packet_count, if_model_path,rf_model_path):
-
+        Parameters:
+            interface (str): Network interface to capture traffic from
+            packet_count (int): Number of packets to capture
+            if_model_path (str): Path to the Isolation Forest model
+            rf_model_path (str): Path to the Random Forest model
+        """
         if_model = model_io.load_model(if_model_path)
         rf_model = model_io.load_model(rf_model_path)
 
         df = network_sniffer.run(interface, packet_count)
+
         dp = data_processor.DataProcessor(df)
         dp.clean_data()
-        
-        # Extract features from the processed data
         prep_data = dp.get_features()
         
-        if_detector = anomaly_detector.AnomalyDetector(if_model, prep_data)
-        if_detector.identify_anomalies()
-        detected_anomalies = if_detector.transform_predictions()
+        new_df= anomaly_detector.run(if_model, prep_data)
 
-        rf_classifier = anomaly_classifier.AnomalyClassifier(rf_model, detected_anomalies)
-        rf_predictions = rf_classifier.classify_anomalies()
-        anomaly_ports = rf_classifier.get_anomaly_ports()
+        rf_classifier = anomaly_classifier.AnomalyClassifier(rf_model, new_df)
+        anomaly_ports_list = rf_classifier.run()
         
         mapper = port_mapper.PortMapper()
-        anomaly_process = mapper.get_port_info(anomaly_ports)
-        
-        #create a dataframe with the results
-        results_df = p
-        return 
+        return mapper.get_port_info(anomaly_ports_list)
 
 
 
-    def train_models_with_offline_data(self, offline_data_path: str):
-        # Load the offline data
-        offline_data = data_processor.load_offline_data(offline_data_path)
-        
-        # Process the offline data
-        processed_data = data_processor.process_packets(offline_data)
-        
-        # Extract features from the processed data
-        features = feature_selector.extract_features(processed_data)
+    def train_models_with_offline_data_default_setting(self, offline_data_path: str):
+        """
+        Preprocess offline data and train new models.
+
+        Parameters:
+            offline_data_path (str): Path to the offline data file. The data should be labeled and preprocessed with CICFlowMeter
+        """
+
+        dp = data_processor.DataProcessor(offline_data_path)
+        dp.clean_data()
+
+        selected_features = dp.get_features()
+        x_train, x_test, y_train, y_test = dp.split_data()
+
+        if_prep_data = selected_features.copy()
         
         # Train the model using the processed features
-        model = model_trainer.train_model(features, self.config['model_params'])
-        
-        # Save the trained model
-        model_io.save_model(model, self.config['model_path'])
-        
-        return model
+        if_trainer = model_trainer.IfModelTrainer(if_prep_data)
+        if_model = if_trainer.train_if_model(n_estimators=100, contamination=0.1)
+
+        rf_trainer = model_trainer.RfModelTrainer(x_train, x_test, y_train, y_test)
+        rf_model = rf_trainer.train_model(n_estimators=100)
+
+        model_io.save_model(if_model, "model/new_if_model")
+        model_io.save_model(rf_model, "model/new_rf_model")
+
+        print("\n  [SUCCESS] Models trained and saved successfully.\n")
+        return if_model, rf_model
