@@ -5,9 +5,24 @@ from sklearn.model_selection import train_test_split
 
 
 class DataProcessor:
+    """
+        Initialize the DataProcessor with a file path or a DataFrame.
+        If a DataFrame is provided, it will be used directly. Otherwise, the file path will be used to load the data.
+        
+        Parameters:
+            data_file_path (str): Path to the CSV file containing the data.
+            dataframe (pd.DataFrame): DataFrame containing the data. If provided, this will be used instead of loading from a file.
+        
+        Functions:
+            - load_data_path: Load data from a CSV file.
+            - get_features: Get selected features from the DataFrame.
+            - split_data: Split the data into training and testing sets.
+            - clean_data: Clean the data by formatting columns, removing duplicates, converting invalid values, and handling missing values.
+    """
     SELECTED_FEATURES = ["ip", "yum", "pudding", "bubble tea"]
 
     def __init__(self, data_file_path:str=None, dataframe: pd.DataFrame = None):
+
         self.df = dataframe or self.load_data_path(data_file_path)
         assert self.df is not None, "[ERROR] DataFrame is None. Please check the input file."
 
@@ -57,7 +72,7 @@ class DataProcessor:
 # Data cleaning steps
 
     def _format_columns(self):
-        self.df.columns.str.strip()
+        self.df.columns = self.df.columns.str.strip()
         # self.df.columns.str.replace(" ", "_")
 
     # Remove duplicates
