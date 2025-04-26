@@ -1,15 +1,19 @@
 
 import pandas as pd
 
-
+from sklearn.cluster import KMeans
 from sklearn.ensemble import IsolationForest, RandomForestClassifier
 
 
 class IfModelTrainer:
+    """
+    Train Isolation Forest model for anomaly detection.
 
+    Parameters:
+        if_prep_data (pd.DataFrame): Preprocessed data for training the Isolation Forest model.
+    """
     def __init__(self, if_prep_data):
-        self.if_prep_data = if_prep_data
-        # self.labels = labels
+        self.if_prep_data = if_prep_data # begnin with the preprocessed data
 
     def train_if_model(self, n_estimators=None, contamination=None):
         return IsolationForest(
@@ -17,8 +21,32 @@ class IfModelTrainer:
         ).fit(self.if_prep_data)
 
 
+class KMeansModelTrainer:
+    """
+    Train KMeans model for anomaly detection.
+
+    Parameters:
+        kmeans_prep_data (pd.DataFrame): Preprocessed (and normalised) data for training the KMeans model.
+    """
+    def __init__(self, kmeans_prep_data):
+        self.kmeans_prep_data = kmeans_prep_data
+
+    def train_kmeans_model(self, n_clusters=None):
+        return KMeans(n_clusters=n_clusters).fit(self.kmeans_prep_data)
+
+
+
 
 class RfModelTrainer:
+    """
+    Train Random Forest model for anomaly classification.
+
+    Parameters:
+        x_train (pd.DataFrame): Training features.
+        x_test (pd.DataFrame): Testing features.
+        y_train (pd.Series): Training labels.
+        y_test (pd.Series): Testing labels.
+    """
 
     def __init__(self, x_train,x_test, y_train, y_test):
         self.x_train = x_train
