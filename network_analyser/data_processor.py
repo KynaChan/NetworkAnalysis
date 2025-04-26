@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import MinMaxScaler
 
 
 
@@ -15,9 +16,11 @@ class DataProcessor:
         
         Functions:
             - load_data_path: Load data from a CSV file.
-            - get_features: Get selected features from the DataFrame.
-            - split_data: Split the data into training and testing sets.
             - clean_data: Clean the data by formatting columns, removing duplicates, converting invalid values, and handling missing values.
+            - get_benign: Get benign data from the DataFrame.
+            - get_features: Get selected features from the DataFrame.
+            - normalise_data: Normalize the data using MinMaxScaler.
+            - split_data: Split the data into training and testing sets.
     """
     SELECTED_FEATURES = ["ip", "yum", "pudding", "bubble tea"]
 
@@ -36,14 +39,23 @@ class DataProcessor:
         return df
 
 
-    def get_features(self, selected_features=SELECTED_FEATURES):
-        return self.df[
-            [col for col in selected_features if col in self.df.columns]
+# for train and detection purpose
+    def get_features(self, input_df=None, selected_features=SELECTED_FEATURES):
+        df = input_df or self.df
+        if df is None:
+            raise ValueError("[ERROR] DataFrame is None. Please check the input file.")
+        return df[
+            [col for col in selected_features if col in df.columns]
         ]
 
+    def normalise_data(features): 
+        scaler = MinMaxScaler() 
+        return scaler.fit_transform(features) # normalise data between 0 and 1
+
+
 # for train purpose
-    def get_without_label(self):
-        return self.df.drop(columns=["Label"])
+    def get_benign(self):
+        return self.df[self.df["Label"] == 0]
 
     def split_data(self, test_size=0.3):
         x = self.get_features()
@@ -56,16 +68,19 @@ class DataProcessor:
         return x_train, x_test, y_train, y_test
 
 
+
 # Main function to process data
     def clean_data(self):
         print("Cleaning data...")
 
         self._format_columns()
+        self._convert_labels()
         self._remove_duplicates()
         self._convert_invalid()
         self._handle_missing()
         
         return self.df
+
 
 
 
@@ -75,21 +90,33 @@ class DataProcessor:
         self.df.columns = self.df.columns.str.strip()
         # self.df.columns.str.replace(" ", "_")
 
+    # if lables are not binary, convert them to 0 and 1
+    def _convert_labels(self):
+        # Convert labels to binary values (0 and 1)
+        if type(self.df["Label"].iloc[0]) == str:
+            self.df["Label"] = self.df["Label"].apply(lambda x: 0 if x == 'BENIGN' else 1).astype(int)
+            print("\n  [SUCCESS] Labels converted to binary values.\n")
+        else:
+            print("\n  [INFO] Labels are already in binary format.\n")
+
     # Remove duplicates
     def _remove_duplicates(self):
         self.df.drop_duplicates(inplace=True)
         print(f"\n  [SUCCESS] Duplicates removed. {self.df.shape[0]} rows remaining.\n")
-
 
     # Convert invalid values to NaN
     def _convert_invalid(self):
         self.df.replace([np.inf, -np.inf], np.nan, inplace=True)
         print("\n  [SUCCESS] Invalid values converted to NaN.\n")
 
-
-    # Handle missing values
+    # Handle missing values (drop labels avoid being affected
     def _handle_missing(self):
-        # Fill missing values with the mean of each column
-        self.df.interpolate(inplace=True)
+        labels = self.df["Label"]
+        features = self.df.drop(columns=["Label"])
+
+        features.interpolate(inplace=True)
+
+        self.df = features.copy()
+        self.df["Label"] = labels
         print("\n  [SUCCESS] Missing values filled with column means.\n")
 
