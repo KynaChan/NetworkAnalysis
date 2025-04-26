@@ -20,11 +20,6 @@ class NetworkAnalyser:
     # train model with offline data 
 
     # possible features: train model with live data (with labels?)
-  
-  
-
-    def __init__(self):
-        pass
 
 
     def analyse_network_with_default_models(self, interface, packet_count):
@@ -77,21 +72,26 @@ class NetworkAnalyser:
 
         dp = data_processor.DataProcessor(offline_data_path)
         dp.clean_data()
+        benign_df = dp.get_benign() # benign df with label
 
-        selected_features = dp.get_features()
+        if_prep_bengin_data = dp.get_features(benign_df)
+        kmeans_prep_bengin_data = dp.standardise_data(benign_df)
+
         x_train, x_test, y_train, y_test = dp.split_data()
-
-        if_prep_data = selected_features.copy()
         
         # Train the model using the processed features
-        if_trainer = model_trainer.IfModelTrainer(if_prep_data)
-        if_model = if_trainer.train_if_model(n_estimators=100, contamination=0.1)
+        if_trainer = model_trainer.IfModelTrainer(if_prep_bengin_data)
+        if_model = if_trainer.train_if_model(n_estimators=300, contamination=0.3)
+
+        kmeans_trainer = model_trainer.KMeansModelTrainer(kmeans_prep_bengin_data)
+        kmeans_model = kmeans_trainer.train_kmeans_model(n_clusters=2)
 
         rf_trainer = model_trainer.RfModelTrainer(x_train, x_test, y_train, y_test)
-        rf_model = rf_trainer.train_model(n_estimators=100)
+        rf_model = rf_trainer.train_model(n_estimators=300)
 
-        model_io.save_model(if_model, "model/new_if_model")
-        model_io.save_model(rf_model, "model/new_rf_model")
+        model_io.save_model(if_model, "model/def_if_model")
+        model_io.save_model(rf_model, "model/def_rf_model")
+        model_io.save_model(kmeans_model, "model/def_kmeans_model")
 
         print("\n  [SUCCESS] Models trained and saved successfully.\n")
-        return if_model, rf_model
+        return if_model, rf_model, kmeans_model
