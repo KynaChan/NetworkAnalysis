@@ -25,7 +25,7 @@ def isolation_forest_model():
 def test_identify_anomalies_sets_attributes(sample_data, isolation_forest_model):
     model = isolation_forest_model(sample_data)
     detector = AnomalyDetector(model, sample_data)
-    detector.identify_anomalies()
+    detector.if_identify_anomalies()
     assert detector.if_predictions is not None
     assert detector.anomalies is not None
     assert detector.benign is not None
@@ -38,7 +38,7 @@ def test_transform_predictions_returns_correct_mapping(
 ):
     model = isolation_forest_model(sample_data)
     detector = AnomalyDetector(model, sample_data)
-    detector.identify_anomalies()
+    detector.if_identify_anomalies()
     transformed = detector.transform_predictions()
     # Should only contain 0 (benign) and 1 (anomaly)
     assert set(transformed.unique()).issubset({0, 1})
