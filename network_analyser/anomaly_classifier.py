@@ -31,9 +31,10 @@ class AnomalyClassifier:
             raise ValueError("[ERROR] No predictions available. Run classify_anomalies() first.")
         
         # Create a DataFrame with the predictions and ports
+        port_columns = [col for col in self.prep_data.columns if 'port' in col]
         anomaly_df = pd.DataFrame({
             "predictions": self.prep_data['prediction']==1,
-            "ports": self.prep_data['Destination Port']
+            "ports": self.prep_data[port_columns]
         })
         anomaly_ports = anomaly_df[anomaly_df['predictions'] == 1]['anomaly_ports'].unique()
         return anomaly_ports
