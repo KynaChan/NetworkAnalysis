@@ -34,6 +34,7 @@ poetry shell
 python3 main.py
 ```
 ## CLI
+```shell
 Network Sniffer and Analyser
 
 options:
@@ -55,6 +56,7 @@ options:
                         Path to the KMeans model file (default: trained_models/default_kmeans_model.joblib)
   -rf RF_MODEL_PATH, --rf_model_path RF_MODEL_PATH
                         Path to the Random Forest model file (default: trained_models/default_rf_model.joblib)
+```
 
 ## Links & References
 
