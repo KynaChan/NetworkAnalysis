@@ -59,13 +59,15 @@ class ModelEvaluator:
                      str(int(bar.get_height())), ha='center', va='bottom')
 
         # Set titles and labels
+        title = f"Comparison of Ground Truth vs Predictions ({model_type})"
         plt.xlabel('Class Labels')
         plt.ylabel('Count')
-        plt.title(f'Comparison of Ground Truth vs Predictions ({model_type})')
+        plt.title(title)
         plt.xticks(ticks=x, labels=all_labels, rotation=45)
         plt.legend()
 
         plt.tight_layout()
+        plt.savefig(title.replace(" ", "_") + ".png")
         plt.show()
 
 
@@ -114,9 +116,11 @@ def compare_model_accuracies(model_name,target_labels,predictions_dict):
         plt.text(bar.get_x() + bar.get_width() / 2, height + 0.01,
                  f'{height:.2f}', ha='center', va='bottom')
 
+    title = f"Accuracy Comparison of {model_name} Models\n(with different feature sets)"
     plt.xticks(ticks=x, labels=labels, rotation=15)
     plt.ylim(0, 1.05)
     plt.ylabel("Accuracy")
-    plt.title(f"Accuracy Comparison of {model_name} Models\n(with different feature sets)")
+    plt.title(title)
     plt.tight_layout()
+    plt.savefig(title.replace(" ", "_") + ".png")
     plt.show()
