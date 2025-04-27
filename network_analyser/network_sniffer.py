@@ -46,7 +46,7 @@ class NetworkSniffer:
         
     # rewrite pcap file to add ethernet layer
     def rewrite_pcap(self):
-        # tcprewrite --dlt=enet --infile="training_data/pcap/file_name.pcap" --outfile="training_data/pcap/file_name_eth.pcap"
+        # tcprewrite --dlt=enet --infile="traffic_data/file_name.pcap" --outfile="traffic_data/file_name_eth.pcap"
         # subprocess.run(["tcprewrite", "--dlt=enet", "--infile=" + self.pcap_file_path, "--outfile=" + self.pcap_file_path])
         pass
 
