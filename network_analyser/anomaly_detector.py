@@ -13,7 +13,7 @@ class AnomalyDetector: # need one more prep data for kmeans
         kmeans_model (KMeans): Pre-trained KMeans model.
         kmeans_prep_data (pd.DataFrame): Preprocessed data for KMeans clustering.
     """
-    def __init__(self, if_model: IsolationForest, if_prep_data: pd.DataFrame,kmeans_model: KMeans,kmeans_prep_data: pd.DataFrame):
+    def __init__(self, if_model: IsolationForest, if_prep_data: pd.DataFrame,kmeans_model: KMeans,kmeans_prep_data):
 
         self.if_model = if_model
         self.kmeans_model = kmeans_model
@@ -31,7 +31,7 @@ class AnomalyDetector: # need one more prep data for kmeans
             if_scores = self.if_identify_anomalies()
             kmeans_distances = self.kmeans_identify_anomalies()
             return self.if_prep_data.assign(
-                if_scores=if_scores, kmeans_distances=kmeans_distances
+                anomaly_scores=if_scores, kmeans_distances=kmeans_distances
             )
 
         except Exception as e:
