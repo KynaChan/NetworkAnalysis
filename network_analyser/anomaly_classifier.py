@@ -27,14 +27,19 @@ class AnomalyClassifier:
 
 
     def get_anomaly_port_df(self):
-        if self.rf_predictions is None:
+        if self.prep_data is None:
             raise ValueError("[ERROR] No predictions available. Run classify_anomalies() first.")
-        
+
         # Create a DataFrame with the predictions and ports
-        port_columns = [col for col in self.prep_data.columns if 'port' in col]
+        port_columns = [col for col in self.prep_data.columns if 'port' in col.lower()]
+        port_column = port_columns[0]
+        if not port_columns:
+            raise ValueError("[ERROR] No port columns found in the DataFrame.")
+
         anomaly_df = pd.DataFrame({
             "predictions": self.prep_data['prediction']==1,
-            "ports": self.prep_data[port_columns]
+            "ports": self.prep_data[port_column]
         })
-        anomaly_ports = anomaly_df[anomaly_df['predictions'] == 1]['anomaly_ports'].unique()
+
+        anomaly_ports = anomaly_df[anomaly_df['predictions']]['ports'].unique()
         return anomaly_ports
