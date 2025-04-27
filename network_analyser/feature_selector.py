@@ -45,4 +45,4 @@ class FeatureSelector:
 
         # Sort in descending order of importance
         self.selected_features = feature_imp_df.sort_values(by='Importance', ascending=False).reset_index(drop=True)
-        return self.selected_features.head(TOP_N).columns.tolist()
+        return self.selected_features.head(self.TOP_N).columns.tolist()
