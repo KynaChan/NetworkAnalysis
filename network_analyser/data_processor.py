@@ -22,7 +22,12 @@ class DataProcessor:
             - normalise_data: Normalize the data using MinMaxScaler.
             - split_data: Split the data into training and testing sets.
     """
-    SELECTED_FEATURES = ["ip", "yum", "pudding", "bubble tea"]
+    SELECTED_FEATURES = ["Bwd Packet Length Mean","Avg Bwd Segment Size","Packet Length Variance",
+        "Packet Length Mean","Average Packet Size","Packet Length Std","Bwd Packet Length Std",
+        "Max Packet Length","Subflow Bwd Bytes","Total Length of Bwd Packets","Fwd IAT Max",
+        "Bwd Packet Length Max","Flow IAT Std","Idle Max","Destination Port","Fwd IAT Total",
+        "Fwd IAT Std","Bwd Packets/s",
+    ]
 
     def __init__(self, data_file_path:str=None, dataframe: pd.DataFrame = None):
 
@@ -41,28 +46,42 @@ class DataProcessor:
 
 # for train and detection purpose
     def get_features(self, input_df=None, selected_features=SELECTED_FEATURES):
-        df = input_df or self.df
+        if input_df is not None:
+            df = input_df
+        else:
+            df = self.df.copy()
+
         if df is None:
             raise ValueError("[ERROR] DataFrame is None. Please check the input file.")
         return df[
             [col for col in selected_features if col in df.columns]
         ]
 
-    def normalise_data(features): 
+    def normalise_data(self, features): 
         scaler = MinMaxScaler() 
         return scaler.fit_transform(features) # normalise data between 0 and 1
 
 
 # for train purpose
-    def get_benign(self):
-        return self.df[self.df["Label"] == 0]
+    def get_benign(self, input_df=None):
+        if input_df is not None:
+            df = input_df
+        else:
+            df = self.df.copy()
 
-    def split_data(self, test_size=0.3):
-        x = self.get_features()
+        return df[df["Label"] == 0].drop(columns=["Label"])
+
+    def split_data(self, input_df=None, test_size=0.3):
+        if input_df is not None:
+            df = input_df
+        else:
+            df = self.df
+
+        x = df
         y = self.df["Label"]
 
         x_train, x_test, y_train, y_test = train_test_split(
-            x, y, test_size=test_size, random_state=42
+            x, y, test_size=test_size, random_state=42, shuffle=True,
         )
 
         return x_train, x_test, y_train, y_test
