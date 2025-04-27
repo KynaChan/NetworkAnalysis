@@ -44,15 +44,15 @@ def main():
         "-t",
         "--train_file",
         type=str,
-        default=TRAINING_FILE_PATH + "concat_train.csv",
-        help="Path to the training data file (default: traffic_data/training_data/concat_train.csv)",
+        # default=TRAINING_FILE_PATH + "concat_train.csv",
+        help="Path to the training data file (default path: traffic_data/training_data/)",
     )
     parser.add_argument(
         "-f",
         "--flow_file",
         type=str,
-        default=TRAFFIC_FILE_PATH + "concat_test.csv",
-        help="Path to the offline data file (default: traffic_data/training_data/concat_test.csv)",
+        # default=TRAFFIC_FILE_PATH + "concat_test.csv",
+        help="Path to the offline data file (default path: traffic_data/)",
     )
     parser.add_argument(
         "-if",
