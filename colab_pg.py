@@ -59,7 +59,7 @@ from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import IsolationForest, RandomForestClassifier
-from sklearn.metrics import classification_report, confusion_matrix,ConfusionMatrixDisplay, accuracy_score, precision_score, recall_score, f1_score
+from sklearn.metrics import classification_report, confusion_matrix,ConfusionMatrixDisplay, accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
 
 FILEPATH = "traffic_data/training_data/"
 
@@ -206,8 +206,8 @@ if_prep_data['kmeans_distance'] = distances.min(axis=1)
 
 """### Accuracy"""
 
-print(accuracy_score(target_labels, if_pred))
-print(classification_report(target_labels, if_pred, digits=4))
+# print(accuracy_score(target_labels, if_pred))
+# print(classification_report(target_labels, if_pred, digits=4))
 # if_model trained with all_features
 
 """# Random Forest"""
@@ -247,8 +247,14 @@ end_time = time.time()
 elapsed_time = end_time - start_time
 print(f"Prediction time for Random Forest with all features: {elapsed_time:.4f} seconds")
 
-print(classification_report(y_test, rf_test_pred, digits=4))
-print(accuracy_score(y_test, rf_test_pred))
+# print(classification_report(y_test, rf_test_pred, digits=4))
+print("\n---------------------")
+print(f"Accuracy for Random Forest with all features: {accuracy_score(y_test, rf_test_pred):.4f}")
+print(f"Precision for Random Forest with all features: {precision_score(y_test, rf_test_pred):.4f}")
+print(f"Recall for Random Forest with all features: {recall_score(y_test, rf_test_pred):.4f}")
+print(f"F1 Score for Random Forest with all features: {f1_score(y_test, rf_test_pred):.4f}")
+print(f"Confusion Matrix for Random Forest with all features: {confusion_matrix(y_test, rf_test_pred)}")
+# print(f"ROC AUC for Random Forest with all features: {roc_auc_score(y_test, rf_test_pred):.4f}")
 print("---------------------\n")
 
 """### Test with unseen data"""
@@ -370,21 +376,22 @@ def train_and_predict_rf(x_train, x_test, y_train, y_test,t=None):
     pred_end_time = time.time()
     pred_elapsed_time = pred_end_time - pred_start_time
     print("\n---------------------")
-    print(f"Training time for Random Forest with {t} threshold selected features: {train_elapsed_time:.4f} seconds")
-    print(f"Prediction time for Random Forest with {t} threshold selected features: {pred_elapsed_time:.4f} seconds")
-    print(f"Classification Report for Random Forest with {t} threshold selected features: {classification_report(y_test, preds, digits=4)}")
-    print(f"Accuracy for Random Forest with {t} threshold selected features: {accuracy_score(y_test, preds):.4f}")
-    print(f"Confusion Matrix for Random Forest with {t} threshold selected features: {confusion_matrix(y_test, preds)}")
+    print(f"Training time for RF model with {t} threshold selected features: {train_elapsed_time:.4f} seconds")
+    print(f"Prediction time for RF model with {t} threshold selected features: {pred_elapsed_time:.4f} seconds\n")
+    # print(f"Classification Report for Random Forest with {t} threshold selected features: {classification_report(y_test, preds, digits=4)}")
+    print(f"Accuracy for RF model with {t} threshold selected features: {accuracy_score(y_test, preds):.4f}")
+    print(f"Precision for RF model with {t} threshold selected features: {precision_score(y_test, preds):.4f}")
+    print(f"Recall for RF model with {t} threshold selected features: {recall_score(y_test, preds):.4f}")
+    print(f"F1 Score for RF model with {t} threshold selected features: {f1_score(y_test, preds):.4f}")
+    print(f"Confusion Matrix for RF model with {t} threshold selected features: {confusion_matrix(y_test, preds)}")
     print("---------------------\n")
-    
-
     return rf_model, preds
 
 # create new df with selected features
 features_01_df = all_features[[col for col in combined_features_01 if col in all_features.columns]]
 features_02_df = all_features[[col for col in combined_features_02 if col in all_features.columns]]
 features_05_df = all_features[[col for col in combined_features_05 if col in all_features.columns]]
-
+print(features_01_df.columns)
 """#### if_model"""
 
 features_01_benign_data = benign_data[[col for col in combined_features_01 if col in benign_data.columns]]
@@ -412,6 +419,8 @@ k_model_01, kmeans_distances_01 = train_and_transform_kmeans(k_begnin_01, k_01_d
 k_model_02, kmeans_distances_02 = train_and_transform_kmeans(k_begnin_02, k_02_df)
 k_model_05, kmeans_distances_05 = train_and_transform_kmeans(k_begnin_05, k_05_df)
 
+
+
 """#### attach new scores & distances"""
 
 def add_additional_features(data_subset, anomaly_scores, kmeans_distances):
@@ -424,6 +433,8 @@ def add_additional_features(data_subset, anomaly_scores, kmeans_distances):
 features_01_df = add_additional_features(features_01_df, if_preds_01['if_anomaly_score'], kmeans_distances_01)
 features_02_df = add_additional_features(features_02_df, if_preds_02['if_anomaly_score'], kmeans_distances_02)
 features_05_df = add_additional_features(features_05_df, if_preds_05['if_anomaly_score'], kmeans_distances_05)
+
+print(features_01_df.columns)
 
 """#### rf_model"""
 
@@ -439,11 +450,6 @@ rf_model_05, rf_test_pred_05 = train_and_predict_rf(x_train_05, x_test_05, y_tra
 
 
 """# Model performances"""
-
-cm = confusion_matrix(y_test, rf_test_pred)
-disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=[0,1])
-disp.plot()
-# disp.savefig("Confusion Matrix of Random Forest with all features.png", bbox_inches='tight')
 
 def compare_if_model_precision(
     model_name,
@@ -535,7 +541,92 @@ rf_accuracies = compare_rf_model_precision(
     }
 )
 
+
+# def get_confusion_matrix(y_true, y_pred, tag=""):
+#     cm = confusion_matrix(y_true, y_pred)
+#     disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=[0,1])
+#     disp.plot()
+#     disp.savefig(f"Confusion Matrix of Random Forest with {tag} features.png", bbox_inches='tight')
+
+# original_cm = confusion_matrix(y_test, rf_test_pred,"all")
+# cm_01 = get_confusion_matrix(y_test_01, rf_test_pred_01, "t = .01")
+# cm_02 = get_confusion_matrix(y_test_02, rf_test_pred_02, "t = .02")
+# cm_05 = get_confusion_matrix(y_test_05, rf_test_pred_05, "t = .05")
+
 """# Save models"""
 dump(if_model_01, "trained_models/if_model_01.joblib")
 dump(k_model_01, "trained_models/kmeans_model_01.joblib")
 dump(rf_model_01, "trained_models/rf_model_01.joblib")
+
+
+
+
+importances = rf_model_01.feature_importances_
+sorted_indices = np.argsort(importances)[::-1]
+sorted_features = np.array(feature_names)[sorted_indices]
+
+plt.figure(figsize=(12, 6))
+
+# Plot all points first
+plt.plot(importances[sorted_indices], marker='o', linestyle='-', label='Other features')
+
+# Now highlight anomaly_scores and kmeans_distance separately
+for idx, feature in enumerate(sorted_features):
+    if feature == 'anomaly_scores':
+        plt.plot(idx, importances[sorted_indices][idx], marker='s', color='red', markersize=10, label='anomaly_scores')
+    elif feature == 'kmeans_distance':
+        plt.plot(idx, importances[sorted_indices][idx], marker='^', color='green', markersize=10, label='kmeans_distance')
+
+thresholds = 0.01, .02,.05
+for t in thresholds:
+    plt.axhline(y=t, linestyle='--', label=f'threshold = {t}')
+
+plt.title('Feature Importance Scores for rf_model')
+plt.xlabel('Features sorted by importance')
+plt.ylabel('Importance Score')
+plt.grid()
+
+# To avoid duplicate labels if multiple points (safe way)
+handles, target_labels = plt.gca().get_legend_handles_labels()
+by_label = dict(zip(target_labels, handles))
+plt.legend(by_label.values(), by_label.keys())
+plt.savefig("Feature Importance Scores for rf_model.png", bbox_inches='tight')
+plt.show()
+
+
+# # Metrics
+# accuracy = [0.98, 0.978]
+# precision = [0.97, 0.975]
+# recall = [0.96, 0.95]
+# f1_score = [0.965, 0.9625]
+
+# # X-axis positions
+# x = np.arange(len(models))
+
+# # Width of each bar
+# width = 0.2
+
+# # Create figure and axes
+# fig, ax = plt.subplots(figsize=(10, 6))
+
+# # Plot each metric
+# ax.bar(x - width*1.5, accuracy, width, label='Accuracy')
+# ax.bar(x - width/2, precision, width, label='Precision')
+# ax.bar(x + width/2, recall, width, label='Recall')
+# ax.bar(x + width*1.5, f1_score, width, label='F1 Score')
+
+# # Labels and title
+# ax.set_ylabel('Scores')
+# ax.set_xlabel('Models')
+# ax.set_title('Model Performance Comparison')
+# ax.set_xticks(x)
+# ax.set_xticklabels(models)
+# ax.set_ylim(0.9, 1.0)
+# ax.legend()
+
+# # Grid and tight layout
+# ax.grid(True, linestyle='--', alpha=0.7)
+# plt.tight_layout()
+
+# # Show the plot
+# plt.show()

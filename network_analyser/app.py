@@ -134,10 +134,11 @@ class App:
         return if_model,  kmeans_model,rf_model
 
     def _process_test_data(self, df):
+        k_drop_cols = ['Destination Port',  ]
         dp = DataProcessor(df)
         dp.clean_data()
         if_df = dp.get_features()
-        kmeans_df = dp.normalise_data(if_df)
+        kmeans_df = dp.normalise_data(if_df).drop(columns=k_drop_cols)
         return if_df, kmeans_df
 
     def _detect_anomaly_ports(self, if_model,if_df, kmeans_model, kmeans_df, rf_model):
