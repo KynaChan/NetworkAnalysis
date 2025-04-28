@@ -22,7 +22,14 @@ class DataProcessor:
             - normalise_data: Normalize the data using MinMaxScaler.
             - split_data: Split the data into training and testing sets.
     """
-    SELECTED_FEATURES = ['Total Backward Packets', 'Packet Length Variance', 'Flow IAT Std',
+    SELECTED_FEATURES = ["Bwd Packet Length Mean","Avg Bwd Segment Size","Packet Length Variance",
+         "Packet Length Mean","Average Packet Size","Packet Length Std","Bwd Packet Length Std",
+         "Max Packet Length","Subflow Bwd Bytes","Total Length of Bwd Packets","Fwd IAT Max",
+         "Bwd Packet Length Max","Flow IAT Std","Idle Max","Destination Port","Fwd IAT Total",
+         "Fwd IAT Std","Bwd Packets/s",
+    ]
+    
+    SELECTED_FEATURES2 = ['Total Backward Packets', 'Packet Length Variance', 'Flow IAT Std',
        'Fwd IAT Mean', 'Total Length of Bwd Packets', 'Max Packet Length',
        'Bwd IAT Max', 'Flow IAT Max', 'Avg Bwd Segment Size', 'Idle Mean',
        'Idle Max', 'Bwd Packet Length Mean', 'Average Packet Size',

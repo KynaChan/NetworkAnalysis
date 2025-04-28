@@ -44,28 +44,28 @@ def main():
         "-t",
         "--train_file",
         type=str,
-        # default=TRAINING_FILE_PATH + "concat_train.csv",
+        default=TRAINING_FILE_PATH + "concat_train.csv",
         help="Path to the training data file (default path: traffic_data/training_data/)",
     )
     parser.add_argument(
         "-f",
         "--flow_file",
         type=str,
-        # default=TRAFFIC_FILE_PATH + "concat_test.csv",
+        default=TRAFFIC_FILE_PATH + "concat_test.csv",
         help="Path to the offline data file (default path: traffic_data/)",
     )
     parser.add_argument(
         "-if",
         "--if_model_path",
         type=str,
-        default=MODEL_FILE_PATH + "default_if_model.joblib",
+        default=MODEL_FILE_PATH + "default_if_model_.joblib",
         help="Path to the Isolation Forest model file (default: trained_models/default_if_model.joblib)",
     )
     parser.add_argument(
         "-kmeans",
         "--kmeans_model_path",
         type=str,
-        default=MODEL_FILE_PATH + "default_kmeans_model.joblib",
+        default=MODEL_FILE_PATH + "default_kmeans_model_.joblib",
         help="Path to the KMeans model file (default: trained_models/default_kmeans_model.joblib)",
     )
     parser.add_argument(
