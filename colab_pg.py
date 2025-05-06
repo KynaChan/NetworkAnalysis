@@ -77,12 +77,16 @@ files = [
 #     "Thursday2-Infilteration.csv",
 #     "Wednesday-DDos.csv",
 # ]
+# test_files3=[
+#     "Monday-Benign.csv",
+#     "Tuesday-BruteForce.csv",
+# ]
 test_files = [f"{FILEPATH}{file}" for file in files]
 
 # Read and combine all CSVs
 raw = pd.concat([pd.read_csv(file) for file in test_files], ignore_index=True)
-# raw.to_csv("raw_test.csv", index=False)
-# print('raw exported.')
+raw.to_csv("concat_mon_tue.csv", index=False)
+print('raw exported.')
 # test_raw= pd.concat([pd.read_csv(file) for file in test_files2], ignore_index=True)
 
 """# Data Cleaning"""
