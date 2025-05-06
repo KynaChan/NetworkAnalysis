@@ -59,7 +59,7 @@ def main():
         "-f",
         "--flow_file",
         type=str,
-        default="concat_test.csv",
+        default="concat_mon_tue.csv",
         help="Path to the offline data file (you can add your file to path: traffic_data/)",
     )
     parser.add_argument(

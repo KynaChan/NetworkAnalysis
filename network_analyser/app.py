@@ -8,8 +8,10 @@ from .anomaly_classifier import AnomalyClassifier
 from .anomaly_detector import AnomalyDetector
 from .port_mapper import PortMapper
 
+import json
 import os.path
 import pandas as pd
+
 
 class App:
 
@@ -39,6 +41,7 @@ class App:
 
         anomaly_ports_list = self._detect_anomaly_ports(if_model, if_df, kmeans_model, kmeans_df, rf_model)
         print(f"\n  [INFO] Anomaly ports detected: {anomaly_ports_list}")
+        self._create_output_directory()
         self._save_anomaly_ports_to_csv(anomaly_ports_list)
         return anomaly_ports_list
 
@@ -73,7 +76,14 @@ class App:
         anomaly_ports_list = self._detect_anomaly_ports(if_model, if_df, kmeans_model, kmeans_df, rf_model)
         
         mapper = PortMapper()
-        return mapper.get_port_info(anomaly_ports_list)
+        result_list = mapper.get_port_info(anomaly_ports_list)
+        # Save the anomaly ports to a CSV file
+        self._create_output_directory()
+
+        with open('port_info.json', 'w') as f:
+            json.dump(result_list, f, indent=4)
+
+        return result_list
 
 
     def train_models_with_offline_data_default_setting(self, offline_data_path: str):
@@ -161,7 +171,6 @@ class App:
             new_file_name = f"{base}_{counter}{ext}"
             counter += 1
         return new_file_name
-    
 
     def _save_anomaly_ports_to_csv(self, anomaly_ports_list, process_name=None, anomaly_score=None):
         anomaly_ports_df = pd.DataFrame(anomaly_ports_list, columns=["Port"]) # can None be added to the columns?
@@ -170,3 +179,10 @@ class App:
         checked_name = self._check_file_exists(file_path+file_name)
         anomaly_ports_df.to_csv(checked_name, index=False)
         print(f"\n  [INFO] Anomaly ports saved to {checked_name}. \n")
+
+    def _create_output_directory(self):
+        output_dir = "outputs/"
+        if os.path.exists(output_dir):
+            return
+        os.makedirs(output_dir)
+        # print(f"Output directory '{output_dir}' created.")
