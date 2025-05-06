@@ -66,22 +66,22 @@ def main():
         "-if",
         "--if_model_name",
         type=str,
-        default="if_model_def.joblib",
-        help="Path to the Isolation Forest model file (default: if_model_def.joblib)",
+        default="if_model.joblib",
+        help="Path to the Isolation Forest model file (default: if_model.joblib)",
     )
     parser.add_argument(
         "-kmeans",
         "--kmeans_model_name",
         type=str,
-        default="kmeans_model_def.joblib",
-        help="Path to the KMeans model file (default: kmeans_model_def.joblib)",
+        default="kmeans_model.joblib",
+        help="Path to the KMeans model file (default: kmeans_model.joblib)",
     )
     parser.add_argument(
         "-rf",
         "--rf_model_name",
         type=str,
-        default="rf_model_def.joblib",
-        help="Path to the Random Forest model file (default: rf_model_def.joblib)",
+        default="rf_model.joblib",
+        help="Path to the Random Forest model file (default: rf_model.joblib)",
     )
 
     args = parser.parse_args()
