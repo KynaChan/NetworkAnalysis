@@ -22,23 +22,19 @@ class DataProcessor:
             - normalise_data: Normalize the data using MinMaxScaler.
             - split_data: Split the data into training and testing sets.
     """
-    SELECTED_FEATURES = ["Bwd Packet Length Mean","Avg Bwd Segment Size","Packet Length Variance",
-         "Packet Length Mean","Average Packet Size","Packet Length Std","Bwd Packet Length Std",
-         "Max Packet Length","Subflow Bwd Bytes","Total Length of Bwd Packets","Fwd IAT Max",
-         "Bwd Packet Length Max","Flow IAT Std","Idle Max","Destination Port","Fwd IAT Total",
-         "Fwd IAT Std","Bwd Packets/s",
-    ]
-    
-    SELECTED_FEATURES2 = ['Total Backward Packets', 'Packet Length Variance', 'Flow IAT Std',
-       'Fwd IAT Mean', 'Total Length of Bwd Packets', 'Max Packet Length',
-       'Bwd IAT Max', 'Flow IAT Max', 'Avg Bwd Segment Size', 'Idle Mean',
-       'Idle Max', 'Bwd Packet Length Mean', 'Average Packet Size',
-       'Subflow Bwd Bytes', 'Fwd Header Length', 'Packet Length Mean',
-       'Init_Win_bytes_forward', 'Fwd IAT Max', 'Fwd IAT Std',
-       'Bwd Packet Length Std', 'Subflow Fwd Packets', 'Total Fwd Packets',
-       'Bwd Packet Length Max', 'Bwd Packets/s', 'Packet Length Std',
-       'Init_Win_bytes_backward', 'Flow Packets/s', 'Fwd IAT Total',
-       'Destination Port', 'Subflow Bwd Packets'
+
+    SELECTED_FEATURES = ['Fwd Header Length', 'Flow Packets/s', 'Flow IAT Mean', 'Fwd IAT Mean',
+       'Total Length of Bwd Packets', 'Subflow Bwd Bytes',
+       'Packet Length Variance', 'Bwd Packet Length Min', 'Fwd IAT Total',
+       'Idle Mean', 'Fwd IAT Std', 'Packet Length Mean',
+       'Init_Win_bytes_backward', 'Bwd Packets/s', 'Average Packet Size',
+       'Subflow Fwd Bytes', 'Avg Bwd Segment Size', 'Flow IAT Std',
+       'Destination Port', 'Bwd IAT Max', 'Total Backward Packets',
+       'Init_Win_bytes_forward', 'Flow IAT Max', 'Bwd Packet Length Std',
+       'Subflow Bwd Packets', 'Idle Max', 'Bwd Packet Length Mean',
+       'Subflow Fwd Packets', 'Bwd Header Length', 'Fwd IAT Max',
+       'Total Fwd Packets', 'Bwd Packet Length Max', 'Packet Length Std',
+       'Max Packet Length'
     ]
 
 

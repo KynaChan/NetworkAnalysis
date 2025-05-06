@@ -13,23 +13,27 @@ import pandas as pd
 
 class App:
 
-    IF_MODEL_PATH = "trained_models/default_if_model.joblib"
-    KMEANS_MODEL_PATH = "trained_models/default_kmeans_model.joblib"
-    RF_MODEL_PATH = "trained_models/default_rf_model.joblib"
+    # MODEL_PATH= "trained_models/"
+    IF_MODEL_NAME = "default_if_model.joblib"
+    KMEANS_MODEL_NAME = "default_kmeans_model.joblib"
+    RF_MODEL_NAME = "default_rf_model.joblib"
 
     # analyse network with pre-trained model
     # analyse network with loaded model
     # train model with offline data 
     # possible features: train model with live data (with labels?)
 
-    def analyse_offline_traffic_with_default_models_return_ports(self, offline_data_path):
+    def analyse_offline_traffic_with_specified_models_return_ports(self, offline_data_path, if_model_name, kmeans_model_name, rf_model_name):
         """
-        Analyze offline data using default models.
+        Analyze offline data using specified models.
 
         Parameters:
             offline_data_path (str): Path to the offline data file. The data should be labeled and preprocessed with CICFlowMeter
+            if_model_path (str): Path to the Isolation Forest model
+            kmeans_model_path (str): Path to the KMeans model
+            rf_model_path (str): Path to the Random Forest model
         """
-        if_model, kmeans_model, rf_model = self._load_models(self.IF_MODEL_PATH, self.KMEANS_MODEL_PATH, self.RF_MODEL_PATH)
+        if_model, kmeans_model, rf_model = self._load_models(if_model_name, kmeans_model_name, rf_model_name)
         if_df, kmeans_df = self._process_test_data(offline_data_path)
         print("\n  [INFO] Start analysing traffic... \n")
 
@@ -37,6 +41,7 @@ class App:
         print(f"\n  [INFO] Anomaly ports detected: {anomaly_ports_list}")
         self._save_anomaly_ports_to_csv(anomaly_ports_list)
         return anomaly_ports_list
+
 
     def analyse_live_traffic_with_default_models_return_processes(self, interface, packet_count):
         """
@@ -46,11 +51,11 @@ class App:
             interface (str): Network interface to capture traffic from
             packet_count (int): Number of packets to capture
         """
-        return self.analyse_network_with_specified_models(
-            interface, packet_count, self.IF_MODEL_PATH, self.KMEANS_MODEL_PATH, self.RF_MODEL_PATH
+        return self.analyse_network_with_specified_models_return_processes(
+            interface, packet_count, self.IF_MODEL_NAME, self.KMEANS_MODEL_NAME, self.RF_MODEL_NAME
         )
         
-    def analyse_network_with_specified_models(self, interface, packet_count, if_model_path, kmeans_model_path,rf_model_path):
+    def analyse_network_with_specified_models_return_processes(self, interface, packet_count, if_model_path, kmeans_model_path,rf_model_path):
         """
         Capture network traffic and analyze it using specified models.
 
@@ -71,7 +76,7 @@ class App:
         return mapper.get_port_info(anomaly_ports_list)
 
 
-    def train_models_with_offline_data_default_setting(self, offline_data_path: str, model_tag: str = "new"):
+    def train_models_with_offline_data_default_setting(self, offline_data_path: str):
         """
         Preprocess offline data and train new models.
 
@@ -116,13 +121,14 @@ class App:
             (rf_model, "rf_model"),
         ]
         for model, model_name in models:
-            model_path_name = f"{model_path}{model_tag}_{model_name}.joblib"
+            model_path_name = f"{model_path}{model_name}.joblib"
             checked_file_name = self._check_file_exists(model_path_name)
             m_io.save_model(model, checked_file_name)
 
         print("\n  [SUCCESS] Models trained and saved successfully.\n")
     
-
+    def train_models_with_live_data(self, interface, packet_count):
+        pass
 
 
 # private functions
@@ -134,11 +140,12 @@ class App:
         return if_model,  kmeans_model,rf_model
 
     def _process_test_data(self, df):
-        # k_drop_cols = ['Destination Port',  ]
+        k_drop_cols = ['Destination Port',  ]
         dp = DataProcessor(df)
         dp.clean_data()
         if_df = dp.get_features()
-        kmeans_df = dp.normalise_data(if_df)
+        kmeans_prep_df = if_df.drop(columns=k_drop_cols)
+        kmeans_df = dp.normalise_data(kmeans_prep_df)
         return if_df, kmeans_df
 
     def _detect_anomaly_ports(self, if_model,if_df, kmeans_model, kmeans_df, rf_model):
