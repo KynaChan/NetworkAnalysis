@@ -391,7 +391,7 @@ def train_and_predict_rf(x_train, x_test, y_train, y_test,t=None):
 features_01_df = all_features[[col for col in combined_features_01 if col in all_features.columns]]
 features_02_df = all_features[[col for col in combined_features_02 if col in all_features.columns]]
 features_05_df = all_features[[col for col in combined_features_05 if col in all_features.columns]]
-print(features_01_df.columns)
+
 """#### if_model"""
 
 features_01_benign_data = benign_data[[col for col in combined_features_01 if col in benign_data.columns]]
@@ -402,6 +402,8 @@ features_05_benign_data = benign_data[[col for col in combined_features_05 if co
 if_model_01, if_preds_01 = train_and_predict_if(features_01_benign_data, features_01_df)
 if_model_02, if_preds_02 = train_and_predict_if(features_02_benign_data, features_02_df)
 if_model_05, if_preds_05 = train_and_predict_if(features_05_benign_data, features_05_df)
+print(features_01_benign_data.columns)
+print(features_01_df.columns)
 
 """#### kmeans_model"""
 
@@ -447,7 +449,8 @@ x_train_05, x_test_05, y_train_05, y_test_05 = train_test_split(features_05_df, 
 rf_model_01, rf_test_pred_01 = train_and_predict_rf(x_train_01, x_test_01, y_train_01,y_test_01,t=0.01)
 rf_model_02, rf_test_pred_02 = train_and_predict_rf(x_train_02, x_test_02, y_train_02,y_test_02, t=0.02)
 rf_model_05, rf_test_pred_05 = train_and_predict_rf(x_train_05, x_test_05, y_train_05,y_test_05, t=0.05)
-
+print(x_train_01.shape)
+print(x_train_01.columns)
 
 """# Model performances"""
 
